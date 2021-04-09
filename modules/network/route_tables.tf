@@ -36,7 +36,7 @@ resource "aws_route" "public_internet_gateway_a" {
 
 resource "aws_route" "tgw_a_to_b" {
   route_table_id         = aws_route_table.public_table_a.id
-  destination_cidr_block = var.cidr_block_b
+  destination_cidr_block = var.cidr_block_b # 10.0.0.0/8?
   transit_gateway_id = module.tgw.tgw_id
 
   timeouts {
@@ -133,9 +133,9 @@ resource "aws_route" "tgw_b_to_a" {
   }
 }
 
-resource "aws_route" "tgw_b_to_c" {
-  route_table_id         = aws_route_table.public_table_b.id
-  destination_cidr_block = var.cidr_block_c
+resource "aws_route" "tgw_b_to_c" {                           #Estou criando a rota na route table, mas vou impedir
+  route_table_id         = aws_route_table.public_table_b.id  #a propagação da TGW associada à VPC B para a VPC C.
+  destination_cidr_block = var.cidr_block_c                   #Assim, elas não poderão se falar.
   transit_gateway_id = module.tgw.tgw_id
 
   timeouts {
@@ -222,9 +222,9 @@ resource "aws_route" "tgw_c_to_a" {
   }
 }
 
-resource "aws_route" "tgw_c_to_b" {
-  route_table_id         = aws_route_table.public_table_c.id
-  destination_cidr_block = var.cidr_block_b
+resource "aws_route" "tgw_c_to_b" {                           #Estou criando a rota na route table, mas vou impedir
+  route_table_id         = aws_route_table.public_table_c.id  #a propagação da TGW associada à VPC C para a VPC B.
+  destination_cidr_block = var.cidr_block_b                   #Assim, elas não poderão se falar.
   transit_gateway_id = module.tgw.tgw_id
 
   timeouts {
