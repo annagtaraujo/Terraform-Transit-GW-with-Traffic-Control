@@ -34,24 +34,34 @@ resource "aws_route" "public_internet_gateway_a" {
   }
 }
 
-resource "aws_route" "tgw_a_to_b" {
+resource "aws_route" "public_tgw_a_to_b" {
   route_table_id         = aws_route_table.public_table_a.id
-  destination_cidr_block = var.cidr_block_b # 10.0.0.0/8?
+  destination_cidr_block = var.cidr_block_b
   transit_gateway_id = module.tgw.tgw_id
 
   timeouts {
     create = "5m"
   }
+
+  depends_on = [
+    module.tgw.tgw_id,
+    module.tgw.tgw_attach_a
+  ]
 }
 
-resource "aws_route" "tgw_a_to_c" {
+resource "aws_route" "public_tgw_a_to_c" {
   route_table_id         = aws_route_table.public_table_a.id
   destination_cidr_block = var.cidr_block_c
   transit_gateway_id = module.tgw.tgw_id
-
+  
   timeouts {
     create = "5m"
   }
+
+  depends_on = [
+    module.tgw.tgw_id,
+    module.tgw.tgw_attach_a
+  ]
 }
 
 resource "aws_route" "private_internet_gateway_a" {
@@ -64,8 +74,38 @@ resource "aws_route" "private_internet_gateway_a" {
   }
 }
 
+resource "aws_route" "private_a_to_b" {
+  route_table_id         = aws_route_table.private_table_a.id
+  destination_cidr_block = var.cidr_block_b
+  transit_gateway_id           = module.tgw.tgw_id
+
+  timeouts {
+    create = "5m"
+  }
+
+    depends_on = [
+    module.tgw.tgw_id,
+    module.tgw.tgw_attach_a
+  ]
+}
+
+resource "aws_route" "private_a_to_c" {
+  route_table_id         = aws_route_table.private_table_a.id
+  destination_cidr_block = var.cidr_block_c
+  transit_gateway_id         = module.tgw.tgw_id
+
+  timeouts {
+    create = "5m"
+  }
+
+  depends_on = [
+    module.tgw.tgw_id,
+    module.tgw.tgw_attach_a
+  ]
+}
+
 resource "aws_route_table_association" "public_a"{  
-   count = 4
+   count = length(var.public_subnets_a)
    subnet_id = aws_subnet.vpc-public-subnet-a[count.index].id
    route_table_id = aws_route_table.public_table_a.id
 
@@ -76,7 +116,7 @@ resource "aws_route_table_association" "public_a"{
 }
 
 resource "aws_route_table_association" "private_a"{  
-   count = 4
+   count = length(var.private_subnets_a)
    subnet_id = aws_subnet.vpc-private-subnet-a[count.index].id
    route_table_id = aws_route_table.private_table_a.id
 
@@ -123,7 +163,7 @@ resource "aws_route" "public_internet_gateway_b" {
   }
 }
 
-resource "aws_route" "tgw_b_to_a" {
+resource "aws_route" "public_tgw_b_to_a" {
   route_table_id         = aws_route_table.public_table_b.id
   destination_cidr_block = var.cidr_block_a
   transit_gateway_id = module.tgw.tgw_id
@@ -131,16 +171,26 @@ resource "aws_route" "tgw_b_to_a" {
   timeouts {
     create = "5m"
   }
+
+  depends_on = [
+    module.tgw.tgw_id,
+    module.tgw.tgw_attach_b
+  ]
 }
 
-resource "aws_route" "tgw_b_to_c" {                           #Estou criando a rota na route table, mas vou impedir
-  route_table_id         = aws_route_table.public_table_b.id  #a propagação da TGW associada à VPC B para a VPC C.
-  destination_cidr_block = var.cidr_block_c                   #Assim, elas não poderão se falar.
+resource "aws_route" "public_tgw_b_to_c" {                    # Mesmo com essa rota definida, não propagarei a tabela
+  route_table_id         = aws_route_table.public_table_b.id  # da route TGW de B para C. Assim, elas nao se falarão
+  destination_cidr_block = var.cidr_block_c
   transit_gateway_id = module.tgw.tgw_id
 
   timeouts {
     create = "5m"
   }
+
+  depends_on = [
+    module.tgw.tgw_id,
+    module.tgw.tgw_attach_b
+  ]  
 }
 
 resource "aws_route" "private_internet_gateway_b" {
@@ -153,8 +203,38 @@ resource "aws_route" "private_internet_gateway_b" {
   }
 }
 
+resource "aws_route" "private_b_to_a" {
+  route_table_id         = aws_route_table.private_table_b.id
+  destination_cidr_block = var.cidr_block_a
+  transit_gateway_id           = module.tgw.tgw_id
+
+  timeouts {
+    create = "5m"
+  }
+
+  depends_on = [
+    module.tgw.tgw_id,
+    module.tgw.tgw_attach_b
+  ]  
+}
+
+resource "aws_route" "private_b_to_c" {                       # Mesmo com essa rota definida, não propagarei a tabela
+  route_table_id         = aws_route_table.private_table_b.id # da route TGW de B para C. Assim, elas nao se falarão
+  destination_cidr_block = var.cidr_block_c
+  transit_gateway_id         = module.tgw.tgw_id
+
+  timeouts {
+    create = "5m"
+  }
+
+  depends_on = [
+    module.tgw.tgw_id,
+    module.tgw.tgw_attach_b
+  ]  
+}
+
 resource "aws_route_table_association" "public_b"{  
-   count = 4
+   count = length(var.public_subnets_b)
    subnet_id = aws_subnet.vpc-public-subnet-b[count.index].id
    route_table_id = aws_route_table.public_table_b.id
 
@@ -165,7 +245,7 @@ resource "aws_route_table_association" "public_b"{
 }
 
 resource "aws_route_table_association" "private_b"{  
-   count = 4
+   count = length(var.private_subnets_b)
    subnet_id = aws_subnet.vpc-private-subnet-b[count.index].id
    route_table_id = aws_route_table.private_table_b.id
 
@@ -212,7 +292,7 @@ resource "aws_route" "public_internet_gateway_c" {
   }
 }
 
-resource "aws_route" "tgw_c_to_a" {
+resource "aws_route" "public_tgw_c_to_a" {
   route_table_id         = aws_route_table.public_table_c.id
   destination_cidr_block = var.cidr_block_a
   transit_gateway_id = module.tgw.tgw_id
@@ -220,16 +300,26 @@ resource "aws_route" "tgw_c_to_a" {
   timeouts {
     create = "5m"
   }
+
+  depends_on = [
+    module.tgw.tgw_id,
+    module.tgw.tgw_attach_c
+  ]
 }
 
-resource "aws_route" "tgw_c_to_b" {                           #Estou criando a rota na route table, mas vou impedir
-  route_table_id         = aws_route_table.public_table_c.id  #a propagação da TGW associada à VPC C para a VPC B.
-  destination_cidr_block = var.cidr_block_b                   #Assim, elas não poderão se falar.
+resource "aws_route" "public_tgw_c_to_b" {                    # Mesmo com essa rota definida, não propagarei a tabela
+  route_table_id         = aws_route_table.public_table_c.id  # da route TGW de B para C. Assim, elas nao se falarão
+  destination_cidr_block = var.cidr_block_b
   transit_gateway_id = module.tgw.tgw_id
 
   timeouts {
     create = "5m"
   }
+
+  depends_on = [
+    module.tgw.tgw_id,
+    module.tgw.tgw_attach_c
+  ]
 }
 
 resource "aws_route" "private_internet_gateway_c" {
@@ -242,8 +332,38 @@ resource "aws_route" "private_internet_gateway_c" {
   }
 }
 
+resource "aws_route" "private_c_to_a" {
+  route_table_id         = aws_route_table.private_table_c.id
+  destination_cidr_block = var.cidr_block_a
+  transit_gateway_id     = module.tgw.tgw_id
+
+  timeouts {
+    create = "5m"
+  }
+
+  depends_on = [
+    module.tgw.tgw_id,
+    module.tgw.tgw_attach_c
+  ]
+}
+
+resource "aws_route" "private_c_to_b" {                       # Mesmo com essa rota definida, não propagarei a tabela
+  route_table_id         = aws_route_table.private_table_c.id # da route TGW de B para C. Assim, elas nao se falarão
+  destination_cidr_block = var.cidr_block_b
+  transit_gateway_id         = module.tgw.tgw_id
+
+  timeouts {
+    create = "5m"
+  }
+
+  depends_on = [
+    module.tgw.tgw_id,
+    module.tgw.tgw_attach_c
+  ]
+}
+
 resource "aws_route_table_association" "public_c"{  
-   count = 4
+   count = length(var.public_subnets_c)
    subnet_id = aws_subnet.vpc-public-subnet-c[count.index].id
    route_table_id = aws_route_table.public_table_c.id
 
@@ -254,7 +374,7 @@ resource "aws_route_table_association" "public_c"{
 }
 
 resource "aws_route_table_association" "private_c"{  
-   count = 4
+   count = length(var.private_subnets_c)
    subnet_id = aws_subnet.vpc-private-subnet-c[count.index].id
    route_table_id = aws_route_table.private_table_c.id
 

@@ -10,7 +10,7 @@ Construção de uma infraestrutura com 3 VPCs na AWS, onde cada VPC contém:
 Dados da infraestrutura:
 Região : us-west-2 (Oregon)
 Qtde de AZ : 4
-Conexão : Transit Gateway
+Conexão : Transit Gateway com controle de tráfego
 Representação gráfica:
 
 ----------                              ----------                                ----------

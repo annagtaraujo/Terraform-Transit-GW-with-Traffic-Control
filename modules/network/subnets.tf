@@ -1,7 +1,9 @@
 ## Subnets da VPC A
 
+
+
 resource "aws_subnet" "vpc-private-subnet-a" {
-  count = 4
+  count = length(var.private_subnets_a)
   vpc_id            = aws_vpc.infra_vpc_a.id
   cidr_block        = var.private_subnets_a[count.index]
   availability_zone = var.subnet_azs[count.index]
@@ -14,12 +16,12 @@ resource "aws_subnet" "vpc-private-subnet-a" {
 }
 
 resource "aws_subnet" "vpc-public-subnet-a" {
-  count = 4
+  count = length(var.public_subnets_a)
   vpc_id            = aws_vpc.infra_vpc_a.id
   cidr_block        = var.public_subnets_a[count.index]             
   availability_zone = var.subnet_azs[count.index]                   
   map_public_ip_on_launch = true
-  
+
   tags              = {
     Name = format("banking-network-vpc-a-pb-%d", count.index)
     }
@@ -28,7 +30,7 @@ resource "aws_subnet" "vpc-public-subnet-a" {
 }
 
 resource "aws_subnet" "vpc-database-subnet-a" {
-  count = 4
+  count = length(var.database_subnets_a)
   vpc_id            = aws_vpc.infra_vpc_a.id
   cidr_block        = var.database_subnets_a[count.index]
   availability_zone = var.subnet_azs[count.index]                
@@ -44,7 +46,7 @@ resource "aws_subnet" "vpc-database-subnet-a" {
 ## Subnets da VPC B
 
 resource "aws_subnet" "vpc-private-subnet-b" {
-  count = 4
+  count = length(var.private_subnets_b)
   vpc_id            = aws_vpc.infra_vpc_b.id
   cidr_block        = var.private_subnets_b[count.index]
   availability_zone = var.subnet_azs[count.index]
@@ -57,7 +59,7 @@ resource "aws_subnet" "vpc-private-subnet-b" {
 }
 
 resource "aws_subnet" "vpc-public-subnet-b" {
-  count = 4
+  count = length(var.public_subnets_b)
   vpc_id            = aws_vpc.infra_vpc_b.id
   cidr_block        = var.public_subnets_b[count.index]             
   availability_zone = var.subnet_azs[count.index]                   
@@ -71,7 +73,7 @@ resource "aws_subnet" "vpc-public-subnet-b" {
 }
 
 resource "aws_subnet" "vpc-database-subnet-b" {
-  count = 4
+  count = length(var.database_subnets_b)
   vpc_id            = aws_vpc.infra_vpc_b.id
   cidr_block        = var.database_subnets_b[count.index]             
   availability_zone = var.subnet_azs[count.index]                   
@@ -87,7 +89,7 @@ resource "aws_subnet" "vpc-database-subnet-b" {
 ## Subnets da VPC C
 
 resource "aws_subnet" "vpc-private-subnet-c" {
-  count = 4
+  count = length(var.private_subnets_c)
   vpc_id            = aws_vpc.infra_vpc_c.id
   cidr_block        = var.private_subnets_c[count.index]
   availability_zone = var.subnet_azs[count.index]
@@ -100,7 +102,7 @@ resource "aws_subnet" "vpc-private-subnet-c" {
 }
 
 resource "aws_subnet" "vpc-public-subnet-c" {
-  count = 4
+  count = length(var.public_subnets_c)
   vpc_id            = aws_vpc.infra_vpc_c.id
   cidr_block        = var.public_subnets_c[count.index]             
   availability_zone = var.subnet_azs[count.index]                   
@@ -114,7 +116,7 @@ resource "aws_subnet" "vpc-public-subnet-c" {
 }
 
 resource "aws_subnet" "vpc-database-subnet-c" {
-  count = 4
+  count = length(var.database_subnets_c)
   vpc_id            = aws_vpc.infra_vpc_c.id
   cidr_block        = var.database_subnets_c[count.index]             
   availability_zone = var.subnet_azs[count.index]                   
@@ -125,3 +127,4 @@ resource "aws_subnet" "vpc-database-subnet-c" {
 
   depends_on = [aws_vpc.infra_vpc_c]
 }
+
